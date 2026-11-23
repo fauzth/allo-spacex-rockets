@@ -1,79 +1,53 @@
-# Allo Bank Frontend Technical Assignment
+# SpaceX Rockets (Allo Bank Frontend Assignment)
 
-In this assignment, you’re assigned to create a website that displays rockets. This website only has two screens: rocket list screen and rocket detail screen. Here are the requirements:
+A two-screen web app that lists SpaceX rockets and shows rocket details, built with React (JavaScript). The Vue/Vuetify starter was replaced with React.
 
-### Functional Requirements
-- As a user, I want to see a list of rockets in the rocket list screen (Show each rocket image, rocket name, and rocket description)
-- As a user, I want to be able to filter the rockets in the rocket list screen
-- As a user, I want to be able to add the new rocket in the rocket list screen (the API is read-only, so the new rocket only needs to appear in the running app)
-- As a user, I want to be able to see the rocket detail by clicking a rocket in the rocket list screen (Show rocket image, rocket name, rocket description, cost per launch, country, first flight)
-- As a user, I want both screens to still display correctly when some rocket data is missing
+## Features
 
-### API
+- Rocket list with image, name, and description
+- Filter by rocket name (case-insensitive)
+- Add a new rocket via a modal form (client-side only, since the API is read-only)
+- Rocket detail: image, name, description, cost per launch, country, first flight
+- Graceful handling of missing data (`image_url`, `launch_cost`, `maiden_flight`, `description`, country)
+- Loading, error (with Retry), and success states on both screens
+- Responsive layout
 
-Use the Launch Library 2 API by The Space Devs for rocket data.
-Docs: https://thespacedevs.com/llapi
+## Tech Stack
 
-Rocket list (returns all 13 SpaceX rockets in a single request):
+- React + Vite
+- React Router (routing)
+- Zustand (state management)
+- Tailwind CSS (styling)
 
-    GET https://lldev.thespacedevs.com/2.2.0/config/launcher/?manufacturer__name=SpaceX&mode=detailed&limit=20
+## Getting Started
 
-Single rocket:
+```bash
+npm install
+npm run dev
+```
 
-    GET https://lldev.thespacedevs.com/2.2.0/config/launcher/:id/
+Other scripts: `npm run build`, `npm run lint`.
 
-`mode=detailed` is required — without it the response omits `description`
-and the other detail fields. `limit=20` is required too — the default page size
-is 10, so without it you get 10 rockets and a `next` page instead of all 13.
+## Project Structure
 
-**API version:** use `2.2.0` as shown above. The docs site now showcases
-`2.3.0`, but `2.2.0` is still live with no announced end-of-life, and the field
-names in the table below are the `2.2.0` ones. Don't migrate: `2.3.0` renames
-the endpoint to `/2.3.0/launcher_configurations/` and moves several of these
-fields (`image_url` becomes `image.image_url`, `manufacturer.country_code`
-becomes a `manufacturer.country` array). Both versions return the same 13
-rockets.
+```
+src/
+  api/          API calls (Launch Library 2)
+  store/        Zustand store (rockets, status, filter query)
+  pages/        RocketListPage, RocketDetailPage
+  components/   RocketCard, RocketFilter, AddRocketForm, Modal,
+                RocketImage, LoadingState, ErrorState
+  utils/        Formatting helpers with "N/A" fallbacks
+```
 
-| Requirement      | Field                              |
-| ---------------- | ---------------------------------- |
-| rocket image     | `image_url`                        |
-| rocket name      | `full_name`                        |
-| description      | `description`                      |
-| cost per launch  | `launch_cost`                      |
-| country          | `manufacturer.country_code`        |
-| first flight     | `maiden_flight`                    |
+## Design Decisions
 
-**Rate limit:** the API allows 15 requests/hour for anonymous users. Use the
-`lldev.thespacedevs.com` host shown above during development — it serves the
-same data with a far more generous limit. The production host,
-`ll.thespacedevs.com`, will throttle you quickly.
+- **API:** uses the `lldev.thespacedevs.com` host and version `2.2.0` with `mode=detailed&limit=20`, as specified in the assignment.
+- **State:** the rocket list, request status, and filter query live in a Zustand store. The list is not refetched when navigating back from the detail page.
+- **Detail page:** reads from the store first, then falls back to fetching by id. This lets rockets added locally open correctly without hitting the API.
+- **Lifecycle:** data fetching runs in `useEffect` with an `AbortController` for cleanup.
+- **Missing data:** each field has an explicit fallback (`N/A`, "No description available.", and a placeholder when the image is missing or fails to load).
 
-Note that some rockets have missing values for `launch_cost`, `maiden_flight`,
-and `image_url`.
+## Known Limitations
 
-### Non-Functional Requirements
-- Use the Launch Library 2 API (see the API section above) for getting the rocket data
-- Implement routers
-- Implement state management
-- Implement lifecycles
-- Create components based will be + points
-- UI states (Loading, Fail/Retry, and Success)
-- Show loading when waiting response from API
-- If an error occurred, user can retry by pressing retry button
-- Show result when get response from API
-
-### Nice to have characteristics
-Responsive design
-You don’t need to worry about the detailed design, we’re not interested in your artistic prowess (for now), put your efforts on creating a readable/clean/maintainable source code.
-
-### Submission
-
-1.  **Fork** this repository.
-
-2.  Implement your solution on a dedicated feature branch (e.g., `feat/allo-spacex`).
-
-3.  When complete, submit your solution via a **Pull Request (PR)** back to the main repository.
-   
-4.  Please complete the form to submit your technical test: [Click Here](https://forms.gle/YAbAQxPuJAdDYmRW7)
-
-Good luck with your assignment! Don't hesitate to contact us if you have any questions about the assignment process.
+- Rockets added through the form exist only in memory and disappear on page refresh.
