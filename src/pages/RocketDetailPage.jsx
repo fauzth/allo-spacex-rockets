@@ -21,10 +21,9 @@ export default function RocketDetailPage() {
   const stored = useRocketStore((s) =>
     s.rockets.find((r) => String(r.id) === id),
   );
-  const [result, setResult] = useState(null); // { id, data } atau { id, error }
+  const [result, setResult] = useState(null);
   const [attempt, setAttempt] = useState(0);
 
-  // id non-numerik = rocket lokal (UUID) yang hilang setelah refresh
   const isLocalId = !/^\d+$/.test(id);
 
   useEffect(() => {
@@ -39,7 +38,6 @@ export default function RocketDetailPage() {
     return () => controller.abort();
   }, [id, stored, isLocalId, attempt]);
 
-  // semua status diturunkan saat render, bukan disimpan di state
   const current = result?.id === id ? result : null;
   const rocket = stored ?? current?.data;
   const error = current?.error;
